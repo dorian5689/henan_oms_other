@@ -1,0 +1,8 @@
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple   -r requirements.txt
+
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    pyserial
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    pynput
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    DrissionPage==4.0.0b16
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    ddddocr
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    yaml
+
