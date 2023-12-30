@@ -52,53 +52,77 @@ class ReadyLogin(object):
         time.sleep(2)
 
         for i in range(6, 12):
-            res.maximize()
-            time.sleep(3)
+            from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
 
-            CU.all_button()
-            time.sleep(3)
+            from datetime import datetime, timedelta
+            yesterday_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
 
-            CU.radio_switch(f'{i}')
-            time.sleep(6)
-            res.minimize()
-            slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' "
-            data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
-            for data in data_info:
-                userid = data[0]
+            yz_sql = F"select 是否已完成,填报开始时间,填报结束时间 from data_oms where   日期='{yesterday_time}' and 电场名称='{wfname}' "
+            yz = 0
 
-                mac_address = data[1]
-                wfname = data[2]
-                set_mac = SetMac()
-                new_mac = mac_address
-                set_mac.run(new_mac)
-                time.sleep(5)
-                try:
-                    FT = FindExeTools()
-                    FT.find_soft()
-                except:
-                    break
-                time.sleep(0.5)
-                username = data[3]
-                password = data[4]
-                try:
-                    from datetime import datetime
-                    # 获取当前时间
-                    current_time = datetime.now()
-                    # 格式化当前时间
-                    start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                    RB = RunSxz(username, password, wfname, userid, start_run_time)
+            try:
+                yz1 = MysqlCurd().query(yz_sql)
+                yz2 = yz1.values.tolist()[0]
+                if yz2[0] is None or yz2[0] == '' or yz2[1] is None or yz2[1] == '' or yz2[2] is None or yz2[2] == '':
+                    yz = 0
+                else:
+                    yz = 1
+            except:
+                pass
+            from datetime import datetime
+            # 获取当前时间
+            current_time = datetime.now()
+            # 格式化当前时间
+            start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+            if yz != 1:
+
+                res.maximize()
+                time.sleep(3)
+
+                CU.all_button()
+                time.sleep(3)
+
+                CU.radio_switch(f'{i}')
+                time.sleep(6)
+                res.minimize()
+                slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' "
+                data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
+                for data in data_info:
+                    userid = data[0]
+
+                    mac_address = data[1]
+                    wfname = data[2]
+                    set_mac = SetMac()
+                    new_mac = mac_address
+                    set_mac.run(new_mac)
+                    time.sleep(5)
                     try:
-
-                        RB.run_sxz()
-                        wfname = ''
+                        FT = FindExeTools()
+                        FT.find_soft()
+                    except:
+                        break
+                    time.sleep(0.5)
+                    username = data[3]
+                    password = data[4]
+                    try:
+                        from datetime import datetime
+                        # 获取当前时间
+                        current_time = datetime.now()
+                        # 格式化当前时间
+                        start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                        RB = RunSxz(username, password, wfname, userid, start_run_time)
+                        try:
+                            RB.run_sxz()
+                            wfname = ''
+                        except Exception as e:
+                            print(f'已经运行了一次{e}')
+                            RB.run_sxz()
+                            wfname = ''
                     except Exception as e:
-                        print(f'已经运行了一次{e}')
-                        RB.run_sxz()
+                        print(F'主函数问题Q,{e}')
                         wfname = ''
-                except Exception as e:
-                    print(F'主函数问题Q,{e}')
-                    wfname = ''
-                    pass
+                        pass
 
 
 class RunSxz(object):
@@ -290,7 +314,6 @@ class RunSxz(object):
         DAT.push_message(self.jf_token, self.message_end)
         DAT.send_file(F'{save_wind_wfname}', 0)
         self.update_mysql()
-
 
     def save_pic(self):
         import os
