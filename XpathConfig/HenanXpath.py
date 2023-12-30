@@ -8,6 +8,8 @@
 """
 
 henan_ele_dict = {
+    # 重新建在
+    'again_post':'//*[@id="reload-button"]',
     # 点击更多
     "details-button": '#details-button',
     # 点击详情页
@@ -26,6 +28,8 @@ henan_ele_dict = {
     'oms_button': 'x://*[@id="app"]/section/section/div/div/div/div/div[4]/div[2]/div/div/div/div/div/div[1]',
     # 点击收报负荷-机组日实际发电量
     'report_load_button_dl': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[1]/a/li/span',
+    # 上上报日期
+    'upload_date': 'x://*[@id="1$cell$2"]/div',
 
     # 发电量
     'send_battery': 'x://*[@id="formtable"]/tbody/tr[2]/td[2]/span[1]/span/input',
@@ -37,7 +41,7 @@ henan_ele_dict = {
     'upload_battery_button': 'x://*[@id="mbtns"]/div',
 
     # 点击收报负荷-储能
-    'report_load_button_cn': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[3]/a/li/span',
+    'report_load_button_cn': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[position()=last()]/a/li/span',
     # 储能最大充电电力
     'store_energy_max_charge_power': 'x://*[@id="formtable"]/tbody/tr[5]/td[2]/span[1]/span/input',
     # 储能最大放电电力

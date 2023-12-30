@@ -31,7 +31,7 @@ class FindExeTools(object):
         :return:  按钮绝对位置
         '''
         folder_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        button_path = F'{folder_path}{os.sep}image{os.sep}icon{os.sep}button{os.sep}'
+        button_path = F'{folder_path}{os.sep}Image{os.sep}icon{os.sep}button{os.sep}'
         return button_path
 
     def find_soft(self, process_name='iscpclient.exe'):
@@ -45,7 +45,7 @@ class FindExeTools(object):
         PT.admin_kill_process(process_name)
 
         self.log.info(F'查找当前运行的{process_name},并结束进程')
-        time.sleep(2)
+        time.sleep(3)
         pag.FAILSAFE = False
         self.log.info(F'查找{process_name},并运行程序')
         # pag.press("win")
@@ -58,17 +58,22 @@ class FindExeTools(object):
         import subprocess
         process_name = F'..{os.sep}ExeSoft{os.sep}iscpclient{os.sep}bin{os.sep}iscpclient.exe'
         subprocess.Popen(process_name)
-        # res = gw.getWindowsWithTitle('安全接入网关SDK')[0]
-        # res.maximize()
-        time.sleep(2)
-        self.click_button(self.moren_path)
-        self.click_button(self.moren_path)
-        self.log.info(F'点击SDK默认按钮')
-
-        self.click_button(self.lianjie_path)
-        self.click_button(self.lianjie_path)
-        self.log.info(F'SDK连接中')
-
+        time.sleep(3)
+        res = gw.getWindowsWithTitle('安全接入网关SDK')[0]
+        res.maximize()
+        time.sleep(3)
+        try:
+            self.click_button(self.moren_path)
+            self.log.info(F'点击SDK默认按钮')
+        except Exception as e:
+            print(e,111)
+        time.sleep(3)
+        try:
+            self.click_button(self.lianjie_path)
+            self.log.info(F'SDK连接中')
+        except Exception as e:
+            print(e,112)
+        time.sleep(3)
         # self.click_button(self.queren_path)
         # pag.press("enter")
         self.log.info(F'SDK确认中')

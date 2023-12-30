@@ -1,8 +1,23 @@
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple   -r requirements.txt
 
+pip list --format=freeze > requirements.txt
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    pyserial
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    pynput
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    DrissionPage==4.0.0b16
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    ddddocr
-pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    yaml
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    PyYAML
 
+
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe  freeze >requirements.txt
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    DrissionPage==4.0.0b16
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    schedule
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    ddddocr
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    pygetwindow
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    PyYAML
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    pyserial
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    pygetwindow
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    pynput
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe install -i https://pypi.tuna.tsinghua.edu.cn/simple    pygetwindow
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe uninstall -r requirements.txt -y
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe uninstall -r requirements.txt -y
+D:\code\trunk\python\PyVersion\Py3911\Scripts\pip.exe uninstall -r requirements.txt -y

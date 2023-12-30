@@ -15,7 +15,7 @@ from DrissionPage import ChromiumPage
 from DrissionPage._configs.chromium_options import ChromiumOptions
 
 from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
-from FindSoft.Find_Exe_Sxz import FindExeTools
+from FindSoft.Find_Exe import FindExeTools
 from MacInfo.ChangeMAC import SetMac
 from XpathConfig.HenanXpath import henan_ele_dict
 import ddddocr
@@ -51,78 +51,57 @@ class ReadyLogin(object):
         res = gw.getWindowsWithTitle('HUB_Control通用版 示例程序')[0]
         time.sleep(2)
 
-        for i in range(6, 12):
-            from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
+        for i in range(7, 12):
 
-            from datetime import datetime, timedelta
-            yesterday_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            res.maximize()
+            time.sleep(1)
 
-            yz_sql = F"select 是否已完成,填报开始时间,填报结束时间 from data_oms where   日期='{yesterday_time}' and 电场名称='{wfname}' "
-            yz = 0
-
-            try:
-                yz1 = MysqlCurd().query(yz_sql)
-                yz2 = yz1.values.tolist()[0]
-                if yz2[0] is None or yz2[0] == '' or yz2[1] is None or yz2[1] == '' or yz2[2] is None or yz2[2] == '':
-                    yz = 0
-                else:
-                    yz = 1
-            except:
-                pass
             from datetime import datetime
             # 获取当前时间
             current_time = datetime.now()
             # 格式化当前时间
             start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-            if yz != 1:
+            CU.all_button()
+            time.sleep(2)
 
-                res.maximize()
-                time.sleep(3)
+            CU.radio_switch(f'{i}')
+            time.sleep(3)
+            res.minimize()
+            slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' "
+            data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
+            for data in data_info:
+                userid = int(data[0])
 
-                CU.all_button()
-                time.sleep(3)
-
-                CU.radio_switch(f'{i}')
+                mac_address = data[1]
+                wfname = data[2]
+                set_mac = SetMac()
+                new_mac = mac_address
+                set_mac.run(new_mac)
                 time.sleep(6)
-                res.minimize()
-                slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' "
-                data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
-                for data in data_info:
-                    userid = data[0]
-
-                    mac_address = data[1]
-                    wfname = data[2]
-                    set_mac = SetMac()
-                    new_mac = mac_address
-                    set_mac.run(new_mac)
-                    time.sleep(5)
+                try:
+                    FT = FindExeTools()
+                    FT.find_soft()
+                except:
+                    break
+                time.sleep(3)
+                username = data[3]
+                password = data[4]
+                try:
+                    from datetime import datetime
+                    # 获取当前时间
+                    current_time = datetime.now()
+                    # 格式化当前时间
+                    start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                    RB = RunSxz(username, password, wfname, userid, start_run_time)
                     try:
-                        FT = FindExeTools()
-                        FT.find_soft()
-                    except:
-                        break
-                    time.sleep(0.5)
-                    username = data[3]
-                    password = data[4]
-                    try:
-                        from datetime import datetime
-                        # 获取当前时间
-                        current_time = datetime.now()
-                        # 格式化当前时间
-                        start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                        RB = RunSxz(username, password, wfname, userid, start_run_time)
-                        try:
-                            RB.run_sxz()
-                            wfname = ''
-                        except Exception as e:
-                            print(f'已经运行了一次{e}')
-                            RB.run_sxz()
-                            wfname = ''
+                        RB.run_sxz(userid)
                     except Exception as e:
-                        print(F'主函数问题Q,{e}')
-                        wfname = ''
-                        pass
+                        print(f'已经运行了一次{e}')
+                        RB.run_sxz(userid)
+                except Exception as e:
+                    print(F'主函数问题Q,{e}')
+                    pass
 
 
 class RunSxz(object):
@@ -151,13 +130,20 @@ class RunSxz(object):
         # self.appsecret = "dKXLDK8yNzaKcXFi_fBHDNvN2B0eTt9dtm0YHOS1H7mYUHxcRASXgwb5oixmKs5y"  # image测试
         # self.chatid = "chat984cfb46cbfa855ac55fd932467cacbd"  # image测试
 
-        self.message_end = {
+        self.message_dl = {
             "msgtype": "markdown",
             "markdown": {
                 "title": "OMS推送",
                 "text":
-                    F'上报场站为:{self.wfname}<br>'
-                    F'usbid为:{self.userid}<br>'
+                    F'第{self.userid}个场站:{self.wfname}--已上报--电量'
+            }
+        }
+        self.message_cn = {
+            "msgtype": "markdown",
+            "markdown": {
+                "title": "OMS推送",
+                "text":
+                    F'第:{self.userid}个场站:{self.wfname}--已上报--储能'
             }
         }
 
@@ -167,6 +153,8 @@ class RunSxz(object):
         暂时不打包谷歌,300M
         :return:
         """
+        user_name = os.getlogin()
+
         try:
             co = ChromiumOptions()
             co.set_argument("--start-maximized")
@@ -174,38 +162,35 @@ class RunSxz(object):
             return page
         except Exception as e:
             try:
-                user_name = os.getlogin()
                 browser_path = F'C:{os.sep}Users{os.sep}{user_name}{os.sep}AppData{os.sep}Local{os.sep}Google{os.sep}Chrome{os.sep}Application{os.sep}chrome.exe'
-                co = ChromiumOptions().set_paths(
-                    browser_path=browser_path)
+                co = ChromiumOptions().set_paths(browser_path=browser_path)
                 co.set_argument("--start-maximized")
                 page = ChromiumPage(co)
                 return page
 
             except Exception as e:
-                co = ChromiumOptions().set_paths(
-                    browser_path=F'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe')
+                browser_path = F'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+                co = ChromiumOptions().set_paths(browser_path=browser_path)
                 co.set_argument("--start-maximized")
                 page = ChromiumPage(co)
                 print(F"异常值:{e}")
                 print(F"找不到本机谷歌浏览器,使用的是edge!")
                 return page
 
-                user_name = os.getlogin()
-                browser_path = F'C:{os.sep}Users{os.sep}{user_name}{os.sep}AppData{os.sep}Local{os.sep}Google{os.sep}Chrome{os.sep}Application{os.sep}chrome.exe'
-                co = ChromiumOptions().set_paths(
-                    browser_path=browser_path)
-                co.set_argument("--start-maximized")
-                page = ChromiumPage(co)
-                return page
-
-    def chrome_login_page(self, username, password):
+    def chrome_login_page(self):
 
         try:
+            # self.page.ele(F'{henan_ele_dict.get("again_post")}')
+            self.page.clear_cache(cookies=False)
+            self.page.refresh()
             self.page.get(self.login)
+            # try:
+            #     self.page.ele(F'{henan_ele_dict.get("details-button")}').click()
+            #     self.page.ele(F'{henan_ele_dict.get("proceed-link")}').click()
+            # except:
+            #     pass
             try:
-                self.page.ele(F'{henan_ele_dict.get("details-button")}').click()
-                self.page.ele(F'{henan_ele_dict.get("proceed-link")}').click()
+                self.exit_username_login()
             except:
                 pass
             self.page(F'{henan_ele_dict.get("input_text")}').input(self.username)
@@ -257,28 +242,33 @@ class RunSxz(object):
 
         return cap_text
 
-    def run_sxz(self, ):
-        cap_text = self.chrome_login_page(self.username, self.password)
+    def run_sxz(self, userid):
+        cap_text = self.chrome_login_page()
         self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
+
         self.page.ele(F'{henan_ele_dict.get("login_button")}').click()
-        # if "欢迎登陆" in self.page.html:
-        #     cap_text = self.send_code()
-        #     self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
-        #     self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-        # if "验证码" in self.page.html:
-        #     cap_text = self.send_code()
-        #     self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
-        #     self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-        # try:
-        #     cap_text = self.send_code()
-        #     self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
-        #     self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-        # except Exception as e:
-        #     print(F'验证码问题！')
-        #     pass
+        if "欢迎登陆" in self.page.html:
+            cap_text = self.send_code()
+            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
+            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
+        if "验证码" in self.page.html:
+            cap_text = self.send_code()
+            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
+            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
+        try:
+            cap_text = self.send_code()
+            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
+            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
+        except Exception as e:
+            print(F'验证码问题！')
+            pass
 
         self.page.wait
         henan_oms_data = self.henan_data()
+        # time.sleep(10)
+        # self.page.quit()
+
+        # return henan_oms_data
 
         self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
         self.page.wait
@@ -289,29 +279,57 @@ class RunSxz(object):
         except:
             pass
         try:
-            self.report_load_cn(table0, henan_oms_data)
+            if userid in [6, 8, 10, 11]:
+                self.report_load_cn(table0, henan_oms_data)
         except:
             pass
-        self.page.quit()
+
+        self.exit_username_oms(table0)
+        table0.close()
+
+    def exit_username_login(self):
+
+        res = self.page.ele('x://*[@id="app"]/section/header/div/div[2]/div/div/span').click()
+
+        if res:
+            self.page.ele('x:/html/body/ul/li[1]/span').click()
+            self.page.ele('x:/html/body/div[2]/div/div[3]/button[2]').click()
+
+        else:
+            return
+
+    def exit_username_oms(self, table0):
+        table0.ele('x://*[@id="app"]/section/header/div/div[2]/div[1]/div/span').click()
+        table0.ele('x://html/body/ul/li[1]/span').click()
+
+        table0.ele('x://*[@id="app"]/section/header/div/div[2]/div[1]/div/span').click()
+        table0.ele('x://html/body/ul/li[4]/span').click()
+        table0.ele('x://html/body/div[28]/div/div[3]/button[2]/span').click()
 
     def report_load_dl(self, table0, henan_oms_data):
         table0.ele(F'{henan_ele_dict.get("report_load_button_dl")}').click()
-        table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[0]}  \ue007')
-        table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[1]}  \ue007')
-        table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[2]}  \ue007')
-        for i_ in range(3):
-            try:
-                table0.ele(F'{henan_ele_dict.get("upload_battery_button")}').click()
-                table0.ele('x:/html/body/div[2]/div/div[3]/button[2]').click()
-            except Exception as e:
-                print(e)
-                print(F'第{i_}次点击上报')
-                pass
+        if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
+            self.send_ding_dl()
 
+        else:
+            table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[0]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[1]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[2]}  \ue007')
+            self.upload_button_dl(table0)
+
+    def send_ding_dl(self):
         save_wind_wfname = self.save_pic()
         from DingInfo.DingBotMix import DingApiTools
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
-        DAT.push_message(self.jf_token, self.message_end)
+        DAT.push_message(self.jf_token, self.message_dl)
+        DAT.send_file(F'{save_wind_wfname}', 0)
+        self.update_mysql()
+
+    def send_ding_cn(self):
+        save_wind_wfname = self.save_pic()
+        from DingInfo.DingBotMix import DingApiTools
+        DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
+        DAT.push_message(self.jf_token, self.message_cn)
         DAT.send_file(F'{save_wind_wfname}', 0)
         self.update_mysql()
 
@@ -329,12 +347,20 @@ class RunSxz(object):
         return save_wind_wfname
 
     def report_load_cn(self, table0, henan_oms_data):
+        time.sleep(2)
+
         table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
-        table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[3]}  \ue007')
-        table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[4]}  \ue007')
-        table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[5]}  \ue007')
-        table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[6]}  \ue007')
-        table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[7]}  \ue007')
+        if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
+            self.send_ding_cn()
+        else:
+            table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[3]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[4]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[5]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[6]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[7]}  \ue007')
+            self.upload_button_cn(table0)
+
+    def upload_button(self, table0):
         for i_ in range(3):
             try:
                 table0.ele(F'{henan_ele_dict.get("upload_battery_button")}').click()
@@ -344,12 +370,14 @@ class RunSxz(object):
                 print(e)
                 print(F'储能第{i_}次点击上报')
                 pass
-        save_wind_wfname = self.save_pic()
-        from DingInfo.DingBotMix import DingApiTools
-        DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
-        DAT.push_message(self.jf_token, self.message_end)
-        DAT.send_file(F'{save_wind_wfname}', 0)
-        self.update_mysql()
+
+    def upload_button_dl(self, table0):
+        self.upload_button(table0)
+        self.send_ding_dl()
+
+    def upload_button_cn(self, table0):
+        self.upload_button(table0)
+        self.send_ding_cn()
 
     def update_mysql(self):
 
