@@ -44,14 +44,14 @@ class ReadyLogin(object):
 
         import subprocess
         subprocess.Popen(exe_path)
-        time.sleep(1)
+        time.sleep(3)
         CU = Change_Uk_Info()
         CU.select_use_device()
         import pygetwindow as gw
         res = gw.getWindowsWithTitle('HUB_Control通用版 示例程序')[0]
-        time.sleep(2)
+        time.sleep(3)
 
-        for i in range(7, 12):
+        for i in range(6, 12):
 
             res.maximize()
             time.sleep(1)
@@ -95,17 +95,25 @@ class ReadyLogin(object):
                     start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                     RB = RunSxz(username, password, wfname, userid, start_run_time)
                     try:
-                        RB.run_sxz(userid)
+                        run_num = RB.run_sxz(userid)
+                        if run_num == 1:
+                            continue
                     except Exception as e:
+                        run_times = 0
+                        for _ in range(3):
+                            run_num = RB.run_sxz(userid)
+                            if run_num < 1:
+                                run_times += 1
+                            if run_times > 3:
+                                return
                         print(f'已经运行了一次{e}')
-                        RB.run_sxz(userid)
                 except Exception as e:
                     print(F'主函数问题Q,{e}')
                     pass
 
 
 class RunSxz(object):
-    def __init__(self, username, password, wfname, userid, start_run_time):
+    def __init__(self, username=None, password=None, wfname=None, userid=None, start_run_time=None):
         """
         基于谷歌内核
         """
@@ -181,7 +189,7 @@ class RunSxz(object):
 
         try:
             # self.page.ele(F'{henan_ele_dict.get("again_post")}')
-            self.page.clear_cache(cookies=False)
+            # self.page.clear_cache(cookies=False)
             self.page.refresh()
             self.page.get(self.login)
             # try:
@@ -193,8 +201,11 @@ class RunSxz(object):
                 self.exit_username_login()
             except:
                 pass
+            time.sleep(3)
             self.page(F'{henan_ele_dict.get("input_text")}').input(self.username)
+            time.sleep(2)
             self.page(F'{henan_ele_dict.get("input_password")}').input(self.password)
+            time.sleep(2)
 
             cap_text = self.send_code()
 
@@ -203,7 +214,7 @@ class RunSxz(object):
         except Exception as e:
             try:
                 print(F'验证码erroor{e}')
-                cap_text = self.chrome_login_page(self.username, self.password)
+                cap_text = self.chrome_login_page()
                 return cap_text
             except:
                 if not cap_text:
@@ -230,16 +241,15 @@ class RunSxz(object):
             img_bytes = f.read()
         cap_text = ocr.classification(img_bytes)
         print(f"验证码:{cap_text}")
-        # 验证码长度不等于5或者包含中文字符再次运行
+        # 验证码长度不等于5或者包含中文字符或者不包含大写字母再次运行
         if len(cap_text) != 5 or bool(
                 re.search(u'[\u4e00-\u9fa5]', cap_text)):
-            print(F'验证码:{cap_text}')
+            print(F' 验证码:{cap_text}')
             for num in range(5):
                 cap_text = self.send_code()
                 time.sleep(2)
                 if len(cap_text) == 5 and re.match('^[a-zA-Z0-9]+$', cap_text):
                     return cap_text
-
         return cap_text
 
     def run_sxz(self, userid):
@@ -247,6 +257,9 @@ class RunSxz(object):
         self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
 
         self.page.ele(F'{henan_ele_dict.get("login_button")}').click()
+        time.sleep(3)
+        self.page.wait
+
         if "欢迎登陆" in self.page.html:
             cap_text = self.send_code()
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
@@ -255,15 +268,9 @@ class RunSxz(object):
             cap_text = self.send_code()
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-        try:
-            cap_text = self.send_code()
-            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
-            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-        except Exception as e:
-            print(F'验证码问题！')
-            pass
+        # if "UK" in self.page.html:
+        #     return
 
-        self.page.wait
         henan_oms_data = self.henan_data()
         # time.sleep(10)
         # self.page.quit()
@@ -283,9 +290,14 @@ class RunSxz(object):
                 self.report_load_cn(table0, henan_oms_data)
         except:
             pass
-
-        self.exit_username_oms(table0)
-        table0.close()
+        try:
+            self.exit_username_oms(table0)
+            table0.close()
+            self.page.quit()
+            return 1
+        except Exception as e:
+            print(f'{e},运行失败！')
+            return 0
 
     def exit_username_login(self):
 
@@ -308,9 +320,9 @@ class RunSxz(object):
 
     def report_load_dl(self, table0, henan_oms_data):
         table0.ele(F'{henan_ele_dict.get("report_load_button_dl")}').click()
+
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
             self.send_ding_dl()
-
         else:
             table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[0]}  \ue007')
             table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[1]}  \ue007')
@@ -351,21 +363,22 @@ class RunSxz(object):
 
         table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
+            time.sleep(5)
             self.send_ding_cn()
         else:
-            table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[3]}  \ue007')
-            table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[4]}  \ue007')
-            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[5]}  \ue007')
-            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[6]}  \ue007')
-            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[7]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day")}').input(F'{float(henan_oms_data[3])}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power")}').input(F'{henan_oms_data[4]}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_max_discharge_power")}').input(F'{henan_oms_data[5]}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power")}').input(F'{henan_oms_data[6]}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(F'{int(henan_oms_data[7])}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(F'{int(henan_oms_data[8])}\ue007')
             self.upload_button_cn(table0)
 
     def upload_button(self, table0):
         for i_ in range(3):
             try:
                 table0.ele(F'{henan_ele_dict.get("upload_battery_button")}').click()
-                table0.ele('x:/html/body/div[2]/div/div[3]/button[2]').click()
-
+                table0.handle_alert(accept=True)
             except Exception as e:
                 print(e)
                 print(F'储能第{i_}次点击上报')
@@ -377,6 +390,7 @@ class RunSxz(object):
 
     def upload_button_cn(self, table0):
         self.upload_button(table0)
+        time.sleep(5)
         self.send_ding_cn()
 
     def update_mysql(self):
@@ -415,7 +429,13 @@ class RunSxz(object):
 
 
 def run_zz_jk_time():
+    close_chrome()
     ReadyLogin().change_usbid()
+
+
+def close_chrome():
+    RunSxz().page.get('https://www.baidu.com')
+    RunSxz().page.quit()
 
 
 #
@@ -423,9 +443,9 @@ if __name__ == '__main__':
     run_zz_jk_time()
 
     # print(F"自动化程序填报运行中,请勿关闭!")
-    # print(F"保佑,保佑,正常运行!")
-    # schedule.every().day.at("07:10").do(run_zz_jk_time)
-    # schedule.every().day.at("17:40").do(run_zz_jk_time)
+    # # print(F"保佑,保佑,正常运行!")
+    # schedule.every().day.at("09:10").do(run_zz_jk_time)
+    # schedule.every().day.at("14:40").do(run_zz_jk_time)
     # while True:
     #     schedule.run_pending()
     #

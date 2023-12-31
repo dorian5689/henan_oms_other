@@ -42,6 +42,7 @@ class FindExeTools(object):
 
         '''
         PT = ProcessCure()
+        time.sleep(1)
         PT.admin_kill_process(process_name)
 
         self.log.info(F'查找当前运行的{process_name},并结束进程')

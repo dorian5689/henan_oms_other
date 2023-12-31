@@ -42,6 +42,8 @@ henan_ele_dict = {
 
     # 点击收报负荷-储能
     'report_load_button_cn': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[position()=last()]/a/li/span',
+    # 储能日最大充电电力
+    'store_energy_max_charge_power_day': 'x://*[@id="formtable"]/tbody/tr[4]/td[2]/span[1]/span/input',
     # 储能最大充电电力
     'store_energy_max_charge_power': 'x://*[@id="formtable"]/tbody/tr[5]/td[2]/span[1]/span/input',
     # 储能最大放电电力
