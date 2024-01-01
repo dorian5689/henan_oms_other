@@ -51,7 +51,7 @@ class ReadyLogin(object):
         res = gw.getWindowsWithTitle('HUB_Control通用版 示例程序')[0]
         time.sleep(3)
 
-        for i in range(6, 12):
+        for i in range(1, 12):
 
             res.maximize()
             time.sleep(1)
@@ -185,11 +185,12 @@ class RunSxz(object):
                 print(F"找不到本机谷歌浏览器,使用的是edge!")
                 return page
 
-    def chrome_login_page(self):
+    def chrome_login_page(self, userid):
 
         try:
             # self.page.ele(F'{henan_ele_dict.get("again_post")}')
             # self.page.clear_cache(cookies=False)
+            time.sleep(2)
             self.page.refresh()
             self.page.get(self.login)
             # try:
@@ -197,10 +198,9 @@ class RunSxz(object):
             #     self.page.ele(F'{henan_ele_dict.get("proceed-link")}').click()
             # except:
             #     pass
-            try:
+            if int(userid) == 1:
                 self.exit_username_login()
-            except:
-                pass
+
             time.sleep(3)
             self.page(F'{henan_ele_dict.get("input_text")}').input(self.username)
             time.sleep(2)
@@ -253,7 +253,7 @@ class RunSxz(object):
         return cap_text
 
     def run_sxz(self, userid):
-        cap_text = self.chrome_login_page()
+        cap_text = self.chrome_login_page(userid)
         self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
 
         self.page.ele(F'{henan_ele_dict.get("login_button")}').click()
@@ -268,14 +268,12 @@ class RunSxz(object):
             cap_text = self.send_code()
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-        # if "UK" in self.page.html:
-        #     return
+        if "解析密码错误" in self.page.html:
+            cap_text = self.send_code()
+            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
+            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
 
         henan_oms_data = self.henan_data()
-        # time.sleep(10)
-        # self.page.quit()
-
-        # return henan_oms_data
 
         self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
         self.page.wait
@@ -324,9 +322,9 @@ class RunSxz(object):
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
             self.send_ding_dl()
         else:
-            table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[0]}  \ue007')
-            table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[1]}  \ue007')
-            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[2]}  \ue007')
+            table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[0]}\ue007')
+            table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[1]}\ue007')
+            table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[2]}\ue007')
             self.upload_button_dl(table0)
 
     def send_ding_dl(self):
@@ -366,22 +364,26 @@ class RunSxz(object):
             time.sleep(5)
             self.send_ding_cn()
         else:
-            table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day")}').input(F'{float(henan_oms_data[3])}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day")}').input(
+                F'{float(henan_oms_data[3])}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power")}').input(F'{henan_oms_data[4]}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_max_discharge_power")}').input(F'{henan_oms_data[5]}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power")}').input(F'{henan_oms_data[6]}\ue007')
-            table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(F'{int(henan_oms_data[7])}\ue007')
-            table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(F'{int(henan_oms_data[8])}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(
+                F'{int(henan_oms_data[7])}\ue007')
+            table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(
+                F'{int(henan_oms_data[8])}\ue007')
             self.upload_button_cn(table0)
 
     def upload_button(self, table0):
-        for i_ in range(3):
             try:
                 table0.ele(F'{henan_ele_dict.get("upload_battery_button")}').click()
-                table0.handle_alert(accept=True)
+                hadle_alert_true = table0.handle_alert(accept=True)
+                print(F'这里是点击确定后的返回值！--{hadle_alert_true}')
             except Exception as e:
-                print(e)
-                print(F'储能第{i_}次点击上报')
+                table0.ele(F'{henan_ele_dict.get("upload_battery_button")}').click()
+                hadle_alert_true = table0.handle_alert(accept=True)
+                print(F'这里是点击确定后的返回值！--{hadle_alert_true}')
                 pass
 
     def upload_button_dl(self, table0):
@@ -438,13 +440,13 @@ def close_chrome():
     RunSxz().page.quit()
 
 
-#
+
 if __name__ == '__main__':
     run_zz_jk_time()
 
     # print(F"自动化程序填报运行中,请勿关闭!")
     # # print(F"保佑,保佑,正常运行!")
-    # schedule.every().day.at("09:10").do(run_zz_jk_time)
+    # schedule.every().day.at("04:10").do(run_zz_jk_time)
     # schedule.every().day.at("14:40").do(run_zz_jk_time)
     # while True:
     #     schedule.run_pending()
