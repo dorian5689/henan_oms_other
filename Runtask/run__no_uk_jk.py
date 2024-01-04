@@ -130,6 +130,7 @@ class ReadyLogin(object):
                     print(F'主函数问题Q,{e}')
                     pass
 
+        return 1
 
 class RunSxz(object):
     def __init__(self, username=None, password=None, wfname=None, userid=None, start_run_time=None):
@@ -294,8 +295,8 @@ class RunSxz(object):
             cap_text = self.send_code()
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-
         henan_oms_data = self.henan_data()
+
 
         self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
         self.page.wait
@@ -442,7 +443,6 @@ class RunSxz(object):
 
         try:
             MC = MysqlCurd()
-
             df_oms = MC.query_sql_return_header_and_data(henan_oms_config)
         except:
             new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
@@ -463,7 +463,7 @@ class RunSxz(object):
 
 
 def run_zz_jk_time():
-    # close_chrome()
+    close_chrome()
 
     ReadyLogin().change_usbid()
 
@@ -474,13 +474,13 @@ def close_chrome():
 
 
 if __name__ == '__main__':
-    run_zz_jk_time()
+    # run_zz_jk_time()
 
-    # print(F"自动化程序填报运行中,请勿关闭!")
-    # # print(F"保佑,保佑,正常运行!")
-    # schedule.every().day.at("04:10").do(run_zz_jk_time)
-    # schedule.every().day.at("14:40").do(run_zz_jk_time)
-    # while True:
-    #     schedule.run_pending()
-    #
-    #     time.sleep(1)
+    print(F"自动化程序填报运行中,请勿关闭!")
+    # print(F"保佑,保佑,正常运行!")
+    schedule.every().day.at("00:10").do(run_zz_jk_time)
+    schedule.every().day.at("14:40").do(run_zz_jk_time)
+    while True:
+        schedule.run_pending()
+
+        time.sleep(1)
