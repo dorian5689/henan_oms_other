@@ -25,6 +25,8 @@ class Change_Uk_Info(object):
             i = str(i)
             if 'USB' in i:
                 num_device = i[-2]
+        if num_device == 0:
+            return
         return num_device
 
     def find_icon_coordinates(self, image):
