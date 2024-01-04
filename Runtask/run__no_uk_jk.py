@@ -38,7 +38,7 @@ class ReadyLogin(object):
     def select_uk(self):
         CU = Change_Uk_Info()
 
-        list_port = CU.select_comports
+        list_port = CU.select_comports()
         if list_port is None:
             return None, None
         exe_path = F'..{os.sep}ExeSoft{os.sep}HUB_Control通用版{os.sep}HUB_Control通用版.exe'
