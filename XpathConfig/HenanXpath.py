@@ -11,9 +11,9 @@ henan_ele_dict = {
     # 重新建在
     'again_post':'//*[@id="reload-button"]',
     # 点击更多
-    "details-button": '#details-button',
+    'details-button': 'x://*[@id="details-button"]',
     # 点击详情页
-    'proceed-link': '#proceed-link',
+    'proceed-link': 'x://*[@id="proceed-link"]',
     # 输入账号
     'input_text': 'x://input[@type="text"]',
     # 输入密码

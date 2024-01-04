@@ -21,6 +21,7 @@ from XpathConfig.HenanXpath import henan_ele_dict
 import ddddocr
 import re
 
+
 import datetime
 from DrissionPage.common import Keys
 
@@ -39,7 +40,7 @@ class ReadyLogin(object):
         CU = Change_Uk_Info()
 
         list_port = CU.select_comports()
-        if list_port is None:
+        if list_port is None :
             return None, None
         exe_path = F'..{os.sep}ExeSoft{os.sep}HUB_Control通用版{os.sep}HUB_Control通用版.exe'
         process_name = F"HUB_Control通用版.exe"
@@ -81,7 +82,13 @@ class ReadyLogin(object):
                 time.sleep(3)
                 res.minimize()
             slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' "
-            data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
+            try:
+                data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
+            except:
+                new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+
+                data_info = MysqlCurd(new_nanfang).query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
+
             for data in data_info:
                 userid = int(data[0])
 
@@ -205,11 +212,14 @@ class RunSxz(object):
             time.sleep(2)
             self.page.refresh()
             self.page.get(self.login)
-            # try:
-            #     self.page.ele(F'{henan_ele_dict.get("details-button")}').click()
-            #     self.page.ele(F'{henan_ele_dict.get("proceed-link")}').click()
-            # except:
-            #     pass
+            self.page.refresh()
+
+            self.page.wait
+            try:
+                self.page.ele(F'{henan_ele_dict.get("details-button")}').click()
+                self.page.ele(F'{henan_ele_dict.get("proceed-link")}').click()
+            except:
+                pass
             if int(userid) == 1:
                 self.exit_username_login()
 
@@ -426,9 +436,19 @@ class RunSxz(object):
 
     def henan_data(self):
         from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
-        from ReadExcle.HenanOmsConfig import henan_oms_config
-        MC = MysqlCurd()
-        df_oms = MC.query_sql_return_header_and_data(henan_oms_config)
+        from ReadExcle.HenanOmsConfig import henan_oms_config,henan_oms_config_new
+
+
+
+        try:
+            MC = MysqlCurd()
+
+            df_oms = MC.query_sql_return_header_and_data(henan_oms_config)
+        except:
+            new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+            MC = MysqlCurd(new_nanfang)
+            df_oms = MC.query_sql_return_header_and_data(henan_oms_config_new)
+
         time.sleep(1)
         henan_oms_data1 = df_oms.loc[
             (df_oms['电场名称'] == self.wfname) & (df_oms['日期'] == self.today_1), ['发电量', '上网电量', '弃电量',
