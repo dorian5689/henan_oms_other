@@ -39,7 +39,7 @@ class ReadyLogin(object):
         CU = Change_Uk_Info()
 
         list_port = CU.select_comports
-        if list_port is None or len(list_port) == 0:
+        if list_port is None:
             return None, None
         exe_path = F'..{os.sep}ExeSoft{os.sep}HUB_Control通用版{os.sep}HUB_Control通用版.exe'
         process_name = F"HUB_Control通用版.exe"
