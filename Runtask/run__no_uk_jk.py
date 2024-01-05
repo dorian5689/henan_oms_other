@@ -299,6 +299,7 @@ class RunSxz(object):
 
 
         self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
+        time.sleep(6)
         self.page.wait
         # sxz
         table0 = self.page.get_tab(0)
@@ -341,6 +342,7 @@ class RunSxz(object):
 
     def report_load_dl(self, table0, henan_oms_data):
         table0.ele(F'{henan_ele_dict.get("report_load_button_dl")}').click()
+        self.page.wait
 
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
             self.send_ding_dl()
@@ -474,13 +476,13 @@ def close_chrome():
 
 
 if __name__ == '__main__':
-    # run_zz_jk_time()
+    run_zz_jk_time()
 
-    print(F"自动化程序填报运行中,请勿关闭!")
-    # print(F"保佑,保佑,正常运行!")
-    schedule.every().day.at("00:10").do(run_zz_jk_time)
-    schedule.every().day.at("14:40").do(run_zz_jk_time)
-    while True:
-        schedule.run_pending()
-
-        time.sleep(1)
+    # print(F"自动化程序填报运行中,请勿关闭!")
+    # # print(F"保佑,保佑,正常运行!")
+    # schedule.every().day.at("00:15").do(run_zz_jk_time)
+    # schedule.every().day.at("14:40").do(run_zz_jk_time)
+    # while True:
+    #     schedule.run_pending()
+    #
+    #     time.sleep(1)
