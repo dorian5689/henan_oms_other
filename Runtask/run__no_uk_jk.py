@@ -21,7 +21,6 @@ from XpathConfig.HenanXpath import henan_ele_dict
 import ddddocr
 import re
 
-
 import datetime
 from DrissionPage.common import Keys
 
@@ -40,7 +39,7 @@ class ReadyLogin(object):
         CU = Change_Uk_Info()
 
         list_port = CU.select_comports()
-        if list_port is None :
+        if list_port is None:
             return None, None
         exe_path = F'..{os.sep}ExeSoft{os.sep}HUB_Control通用版{os.sep}HUB_Control通用版.exe'
         process_name = F"HUB_Control通用版.exe"
@@ -127,8 +126,10 @@ class ReadyLogin(object):
                                 return
                         print(f'已经运行了一次{e}')
                 except Exception as e:
-                    print(F'主函数问题Q,{e}')
+                    print(F'主函数问题Q')
                     pass
+
+        return 1
 
 
 class RunSxz(object):
@@ -200,7 +201,7 @@ class RunSxz(object):
                 co = ChromiumOptions().set_paths(browser_path=browser_path)
                 co.set_argument("--start-maximized")
                 page = ChromiumPage(co)
-                print(F"异常值:{e}")
+                # print(F"异常值:{e}")
                 print(F"找不到本机谷歌浏览器,使用的是edge!")
                 return page
 
@@ -294,10 +295,10 @@ class RunSxz(object):
             cap_text = self.send_code()
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
-
         henan_oms_data = self.henan_data()
 
         self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
+        time.sleep(6)
         self.page.wait
         # sxz
         table0 = self.page.get_tab(0)
@@ -313,10 +314,14 @@ class RunSxz(object):
         try:
             self.exit_username_oms(table0)
             table0.close()
-            self.page.quit()
+            try:
+                # self.page.quit()
+                table0.quit()
+            except:
+                pass
             return 1
         except Exception as e:
-            print(f'{e},运行失败！')
+            print(f'运行失败！')
             return 0
 
     def exit_username_login(self):
@@ -336,46 +341,61 @@ class RunSxz(object):
 
         table0.ele('x://*[@id="app"]/section/header/div/div[2]/div[1]/div/span').click()
         table0.ele('x://html/body/ul/li[4]/span').click()
-        table0.ele('x://html/body/div[28]/div/div[3]/button[2]/span').click()
+
+        table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
+        time.sleep(2)
 
     def report_load_dl(self, table0, henan_oms_data):
         table0.ele(F'{henan_ele_dict.get("report_load_button_dl")}').click()
+        self.page.wait
 
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
-            self.send_ding_dl()
+            self.send_ding_dl(table0)
         else:
             table0.ele(F'{henan_ele_dict.get("send_battery")}').input(F'{henan_oms_data[0]}\ue007')
             table0.ele(F'{henan_ele_dict.get("upload_battery")}').input(F'{henan_oms_data[1]}\ue007')
             table0.ele(F'{henan_ele_dict.get("abandoned_battery")}').input(F'{henan_oms_data[2]}\ue007')
             self.upload_button_dl(table0)
 
-    def send_ding_dl(self):
-        save_wind_wfname = self.save_pic()
+    def send_ding_dl(self, table0):
+        save_wind_wfname = self.save_pic(table0)
         from DingInfo.DingBotMix import DingApiTools
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
         DAT.push_message(self.jf_token, self.message_dl)
         DAT.send_file(F'{save_wind_wfname}', 0)
         self.update_mysql()
 
-    def send_ding_cn(self):
-        save_wind_wfname = self.save_pic()
+    def send_ding_cn(self, table0):
+        save_wind_wfname = self.save_pic(table0)
         from DingInfo.DingBotMix import DingApiTools
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
         DAT.push_message(self.jf_token, self.message_cn)
         DAT.send_file(F'{save_wind_wfname}', 0)
         self.update_mysql()
 
-    def save_pic(self):
+    def save_pic(self, table0):
         import os
-        img_path = F"..{os.sep}Image{os.sep}save_wind{os.sep}{self.today_1}{os.sep}"
-        directory = os.path.dirname(img_path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        import shutil
+        from pathlib import Path
 
-        from PIL import ImageGrab
-        im = ImageGrab.grab()
+        img_path = Path(f"..{os.sep}Image{os.sep}save_wind{os.sep}{self.today_1}{os.sep}")
+        directory = img_path.parent
+
+        if directory.exists():
+            # 如果目录存在且不为空，则递归删除整个目录及其内容
+            shutil.rmtree(directory)
+            # 然后重新创建该目录
+            directory.mkdir(parents=True, exist_ok=True)
+
+        # 对整页截图并保存
         save_wind_wfname = F"{img_path}{os.sep}{self.wfname}_程序.png"
-        im.save(save_wind_wfname)
+
+        table0.get_screenshot(path=save_wind_wfname, full_page=True)
+
+        # from PIL import ImageGrab
+        # im = ImageGrab.grab()
+        # save_wind_wfname = F"{img_path}{os.sep}{self.wfname}_程序.png"
+        # im.save(save_wind_wfname)
         return save_wind_wfname
 
     def report_load_cn(self, table0, henan_oms_data):
@@ -415,7 +435,7 @@ class RunSxz(object):
     def upload_button_cn(self, table0):
         self.upload_button(table0)
         time.sleep(5)
-        self.send_ding_cn()
+        self.send_ding_cn(table0)
 
     def update_mysql(self):
 
@@ -436,13 +456,10 @@ class RunSxz(object):
 
     def henan_data(self):
         from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
-        from ReadExcle.HenanOmsConfig import henan_oms_config,henan_oms_config_new
-
-
+        from ReadExcle.HenanOmsConfig import henan_oms_config, henan_oms_config_new
 
         try:
             MC = MysqlCurd()
-
             df_oms = MC.query_sql_return_header_and_data(henan_oms_config)
         except:
             new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
@@ -463,14 +480,17 @@ class RunSxz(object):
 
 
 def run_zz_jk_time():
-    # close_chrome()
+    close_chrome()
 
     ReadyLogin().change_usbid()
 
 
 def close_chrome():
     RunSxz().page.get('https://www.baidu.com')
-    RunSxz().page.quit()
+    try:
+        RunSxz().page.quit()
+    except:
+        pass
 
 
 if __name__ == '__main__':
@@ -478,7 +498,7 @@ if __name__ == '__main__':
 
     # print(F"自动化程序填报运行中,请勿关闭!")
     # # print(F"保佑,保佑,正常运行!")
-    # schedule.every().day.at("04:10").do(run_zz_jk_time)
+    # schedule.every().day.at("00:15").do(run_zz_jk_time)
     # schedule.every().day.at("14:40").do(run_zz_jk_time)
     # while True:
     #     schedule.run_pending()
