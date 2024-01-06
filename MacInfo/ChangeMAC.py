@@ -51,39 +51,48 @@ class SetMac(object):
         mac_info = subprocess.check_output('GETMAC /v /FO list', stderr=subprocess.STDOUT)
         mac_info = mac_info.decode('gbk')
         # self.log.info(F' MAC 地址:{mac_info}')
+    def find_mac_link_name(self,network_info):
+        network_info = network_info.replace('\r\n', '\n')
 
+        interface_pattern = re.compile(r'连接名:\s*(.*)')
+        adapter_pattern = re.compile(r'网络适配器:\s*(.*)')
+        mac_address_pattern = re.compile(r'物理地址:\s*(.*)')
+        transfer_name_pattern = re.compile(r'传输名称:\s*(.*)')
+
+        interfaces = []
+
+        for block in network_info.split('\n\n'):
+            interface = {}
+            for line in block.split('\n'):
+                match_interface = interface_pattern.match(line)
+                match_adapter = adapter_pattern.match(line)
+                match_mac_address = mac_address_pattern.match(line)
+                match_transfer_name = transfer_name_pattern.match(line)
+
+                if match_interface:
+                    interface['连接名'] = match_interface.group(1)
+                elif match_adapter:
+                    interface['网络适配器'] = match_adapter.group(1)
+                elif match_mac_address:
+                    interface['物理地址'] = match_mac_address.group(1)
+                elif match_transfer_name:
+                    interface['传输名称'] = match_transfer_name.group(1)
+
+            if '以太网' in interface['连接名'] and interface['传输名称'] != '媒体已断开连接':
+                print(f'连接名: {interface["连接名"]}, 物理地址: {interface["物理地址"]} 正在使用中')
+                return interface["连接名"],interface["物理地址"]
     def get_target_device(self):
         """
         返回 本地连接 网络适配器
         :return:
         """
         mac_info = subprocess.check_output('GETMAC /v /FO list', stderr=subprocess.STDOUT)
-        mac_info = mac_info.decode('gbk')
-        # mac_info = mac_info.decode('gbk').replace("\r","").replace("\n","")
-        search = re.search(r'(以太网)\s+网络适配器: (.+)\s+物理地址:', mac_info)
-        # search = re.search(r'(以太网)网络适配器: (.+)+物理地址:', mac_info)
-        target_name, target_device = (search.group(1), search.group(2).strip()) if search else ('', '')
+        network_info = mac_info.decode('gbk')
+        target_name, target_device = self.find_mac_link_name(network_info)
+
         if not all([target_name, target_device]):
             self.log.error(F'没有找到网卡信息！')
             sys.exit()
-            # try:
-            #     pattern = re.compile(r'连接名: (.*?)\r\n网络适配器: (.*?)\n')  # 正则表达式模式
-            #     match = pattern.search(mac_info)  # 执行正则表达式匹配
-            #
-            #     target_name, target_device = (match.group(1), match.group(2).strip()) if match else (
-            #     '', '')  # 提取连接名和网络适配器名称
-            #     print("连接名称:", target_name)
-            #     print("网络适配器名称:", target_device)
-            #     if  not target_device:
-            #         self.log.error(F'没有找到网卡信息！')
-            #         sys.exit()
-            # except:
-            #     self.log.error(F'没有找到网卡信息！')
-            #     sys.exit()
-
-        # self.log.info(F'=' * 50)
-        # self.log.info(F'网卡名称"{target_name}')
-        # self.log.info(F'网卡信息:{target_device}')
 
         return target_device
 
