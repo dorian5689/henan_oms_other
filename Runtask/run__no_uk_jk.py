@@ -39,7 +39,7 @@ class ReadyLogin(object):
         CU = Change_Uk_Info()
 
         list_port = CU.select_comports()
-        if list_port is None :
+        if list_port is None:
             return None, None
         exe_path = F'..{os.sep}ExeSoft{os.sep}HUB_Control通用版{os.sep}HUB_Control通用版.exe'
         process_name = F"HUB_Control通用版.exe"
@@ -49,7 +49,7 @@ class ReadyLogin(object):
 
         import subprocess
         subprocess.Popen(exe_path)
-        time.sleep(3)
+        time.sleep(6)
         CU.select_use_device()
 
         import pygetwindow as gw
@@ -57,16 +57,17 @@ class ReadyLogin(object):
         time.sleep(3)
         return res, CU
 
-    def select_usb_id(self):
-        from Config.ConfigUkUsb import henan_wfname_dict_num
-        usb_ids = []
-        for k, v in henan_wfname_dict_num.items():
-            usb_ids.append(k)
-        return usb_ids
+    # def select_usb_id(self):
+    #     from Config.ConfigUkUsb import henan_wfname_dict_num
+    #     usb_ids = []
+    #     for k, v in henan_wfname_dict_num.items():
+    #         usb_ids.append(k)
+    #     return usb_ids
 
     def change_usbid(self):
         res, CU = self.select_uk()
-        for i in self.select_usb_id():
+        from Config.ConfigUkUsb import henan_wfname_dict_num
+        for i, uuid in henan_wfname_dict_num.items():
             from datetime import datetime
             # 获取当前时间
             current_time = datetime.now()
@@ -80,11 +81,13 @@ class ReadyLogin(object):
                 CU.radio_switch(f'{i}')
                 time.sleep(3)
                 res.minimize()
-            slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' "
             try:
+                slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' "
+
                 data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
             except:
                 new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+                slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' and uuid ='{uuid}'  "
 
                 data_info = MysqlCurd(new_nanfang).query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
 
@@ -315,18 +318,22 @@ class RunSxz(object):
             self.exit_username_oms(table0)
             table0.close()
             try:
-                # self.page.quit()
-                table0.quit()
+                self.page.quit()
+                print("网页退出！")
             except:
                 pass
             return 1
+
+
         except Exception as e:
             print(f'运行失败！')
             return 0
 
     def exit_username_login(self):
-
-        res = self.page.ele('x://*[@id="app"]/section/header/div/div[2]/div/div/span').click()
+        try:
+            res = self.page.ele('x://*[@id="app"]/section/header/div/div[2]/div/div/span').click()
+        except:
+            res = 0
 
         if res:
             self.page.ele('x:/html/body/ul/li[1]/span').click()
@@ -342,7 +349,9 @@ class RunSxz(object):
         table0.ele('x://*[@id="app"]/section/header/div/div[2]/div[1]/div/span').click()
         table0.ele('x://html/body/ul/li[4]/span').click()
 
-        table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
+        # table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
+        table0.ele('x://html/body/div[28]/div/div[3]/button[2]/span').click()
+
         time.sleep(2)
 
     def report_load_dl(self, table0, henan_oms_data):
@@ -486,9 +495,11 @@ def run_zz_jk_time():
 
 
 def close_chrome():
-    RunSxz().page.get('https://www.baidu.com')
+    page = RunSxz().page
+    page.get('https://www.baidu.com')
+
     try:
-        RunSxz().page.quit()
+        page.quit()
     except:
         pass
 
