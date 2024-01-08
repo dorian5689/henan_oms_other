@@ -166,7 +166,7 @@ class RunSxz(object):
             "markdown": {
                 "title": "OMS推送",
                 "text":
-                    F'第{self.userid}个场站:{self.wfname}--已上报--电量'
+                    F'第{self.userid}个场站:{self.wfname}--已上报--电量--现场程序'
             }
         }
         self.message_cn = {
@@ -174,7 +174,7 @@ class RunSxz(object):
             "markdown": {
                 "title": "OMS推送",
                 "text":
-                    F'第:{self.userid}个场站:{self.wfname}--已上报--储能'
+                    F'第:{self.userid}个场站:{self.wfname}--已上报--储能--现场程序'
             }
         }
 
@@ -410,6 +410,7 @@ class RunSxz(object):
     def report_load_cn(self, table0, henan_oms_data):
         time.sleep(2)
 
+        table0.ele(F'{henan_ele_dict.get("report_load")}').click()
         table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
             time.sleep(5)
