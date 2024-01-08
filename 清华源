@@ -34,3 +34,10 @@ Get-Content packages.txt | ForEach-Object { python -m pip uninstall -y $_ }
 
 # 或者，如果只需要包名而不考虑版本：
 # Get-Content packages.txt | Select-String -Pattern '^[^=\s]+' -NotMatch | ForEach-Object { python -m pip uninstall -y $_.Line.Trim() }
+
+
+#取消http代理
+git config --global --unset http.proxy
+
+#取消https代理
+git config --global --unset https.proxy
