@@ -6,10 +6,10 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    pynput
 
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    ddddocr
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    PyYAML
-C:\Python3911\python.exe -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 pip freeze >requirements.txt
-pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    DrissionPage==4.0.0b35
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple   DrissionPage==4.0.1
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    schedule
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    ddddocr
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple    pygetwindow
@@ -33,7 +33,7 @@ python -m pip list --format=freeze > packages.txt
 Get-Content packages.txt | ForEach-Object { python -m pip uninstall -y $_ }
 
 # 或者，如果只需要包名而不考虑版本：
-# Get-Content packages.txt | Select-String -Pattern '^[^=\s]+' -NotMatch | ForEach-Object { python -m pip uninstall -y $_.Line.Trim() }
+Get-Content packages.txt | Select-String -Pattern '^[^=\s]+' -NotMatch | ForEach-Object { python -m pip uninstall -y $_.Line.Trim() }
 
 
 #取消http代理

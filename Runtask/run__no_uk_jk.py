@@ -509,8 +509,8 @@ if __name__ == '__main__':
 
     # print(F"自动化程序填报运行中,请勿关闭!")
     # # print(F"保佑,保佑,正常运行!")
-    # schedule.every().day.at("00:15").do(run_zz_jk_time)
-    # schedule.every().day.at("14:40").do(run_zz_jk_time)
+    # schedule.every().day.at("00:20").do(run_zz_jk_time)
+    # schedule.every().day.at("00:40").do(run_zz_jk_time)
     # while True:
     #     schedule.run_pending()
     #
