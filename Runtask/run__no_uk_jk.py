@@ -490,7 +490,6 @@ class RunSxz(object):
 
 def run_zz_jk_time():
     close_chrome()
-
     ReadyLogin().change_usbid()
 
 
