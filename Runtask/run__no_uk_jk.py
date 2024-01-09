@@ -163,7 +163,7 @@ class RunSxz(object):
         self.appsecret = "C33oOe03_K5pitN_S2dUppBwgit2VnPW0yWnWYBM3GzogGKhdy2yFUGREl9fLICU"  # image测试
         self.chatid = "chatf3b32d9471c57b4a5a0979efdb06d087"  # image测试
         # 奈卢斯
-        self.nls_appkey = "434e89afe668307088f0c4d6e28bd03c"  # image测试
+        self.nls_appkey = "dingjk2duanbfvbywqzx"  # image测试
         self.nls_appsecret = "ICYb4-cvsvIk5DwuZY9zehc5UbpldqIClzS6uuIYFrhjU9z11guV6lold1qNqc2k"  # image测试
         self.nls_chatid = "chatf8ef1e955cf2c4e83a7e776e0011366c"  # image测试
 
@@ -277,7 +277,7 @@ class RunSxz(object):
         if len(cap_text) != 5 or bool(
                 re.search(u'[\u4e00-\u9fa5]', cap_text)):
             print(F' 验证码:{cap_text}')
-            for num in range(5):
+            for num in range(10):
                 cap_text = self.send_code()
                 time.sleep(2)
                 if len(cap_text) == 5 and re.match('^[a-zA-Z0-9]+$', cap_text):
@@ -354,9 +354,10 @@ class RunSxz(object):
 
         table0.ele('x://*[@id="app"]/section/header/div/div[2]/div[1]/div/span').click()
         table0.ele('x://html/body/ul/li[4]/span').click()
-
-        # table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
-        table0.ele('x://html/body/div[28]/div/div[3]/button[2]/span').click()
+        try:
+            table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
+        except:
+            table0.ele('x://html/body/div[28]/div/div[3]/button[2]/span').click()
 
         time.sleep(2)
 
@@ -381,13 +382,14 @@ class RunSxz(object):
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
         DAT.push_message(self.jf_token, self.message_dl)
         DAT.send_file(F'{save_wind_wfname}', 0)
-        self.update_mysql()
 
         # 奈卢斯
-        DAT = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
-                           chatid_value=self.nls_chatid)
-        DAT.push_message(self.nls_token, self.message_dl)
-        DAT.send_file(F'{save_wind_wfname}', 0)
+        DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                              chatid_value=self.nls_chatid)
+        DATNLS.push_message(self.nls_token, self.message_dl)
+        DATNLS.send_file(F'{save_wind_wfname}', 0)
+
+        self.update_mysql()
 
     def send_ding_cn(self, table0):
         save_wind_wfname = self.save_pic(table0)
@@ -396,13 +398,14 @@ class RunSxz(object):
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
         DAT.push_message(self.jf_token, self.message_cn)
         DAT.send_file(F'{save_wind_wfname}', 0)
-        self.update_mysql()
 
         # 奈卢斯
-        DAT = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
-                           chatid_value=self.nls_chatid)
-        DAT.push_message(self.nls_token, self.message_dl)
-        DAT.send_file(F'{save_wind_wfname}', 0)
+        DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                              chatid_value=self.nls_chatid)
+        DATNLS.push_message(self.nls_token, self.message_dl)
+        DATNLS.send_file(F'{save_wind_wfname}', 0)
+
+        self.update_mysql()
 
     def save_pic(self, table0):
         import os
