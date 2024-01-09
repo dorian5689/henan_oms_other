@@ -355,6 +355,7 @@ class RunSxz(object):
         time.sleep(2)
 
     def report_load_dl(self, table0, henan_oms_data):
+        table0.ele(F'{henan_ele_dict.get("report_load")}').click()
         table0.ele(F'{henan_ele_dict.get("report_load_button_dl")}').click()
         self.page.wait
 

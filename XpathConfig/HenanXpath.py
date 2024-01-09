@@ -26,6 +26,9 @@ henan_ele_dict = {
     'login_button': 'x://*[@id="app"]/div/div/form/div[6]/div/button',
     # 点击oms按钮
     'oms_button': 'x://*[@id="app"]/section/section/div/div/div/div/div[4]/div[2]/div/div/div/div/div/div[1]',
+
+    # 收报负荷
+    'report_load': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/div/span',
     # 点击收报负荷-机组日实际发电量
     'report_load_button_dl': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[1]/a/li/span',
     # 上上报日期
