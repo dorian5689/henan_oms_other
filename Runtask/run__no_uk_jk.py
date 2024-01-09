@@ -87,7 +87,7 @@ class ReadyLogin(object):
                 data_info = MysqlCurd().query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
             except:
                 new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
-                slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码  from data_oms_uk  where usb序号='{i}' and uuid ='{uuid}'  "
+                slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码,wfname_id  from data_oms_uk  where usb序号='{i}' and uuid ='{uuid}'  "
 
                 data_info = MysqlCurd(new_nanfang).query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
 
@@ -108,13 +108,14 @@ class ReadyLogin(object):
                 time.sleep(3)
                 username = data[3]
                 password = data[4]
+                wfname_id = data[5]
                 try:
                     from datetime import datetime
                     # 获取当前时间
                     current_time = datetime.now()
                     # 格式化当前时间
                     start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                    RB = RunSxz(username, password, wfname, userid, start_run_time)
+                    RB = RunSxz(username, password, wfname, userid, wfname_id,start_run_time)
                     try:
                         run_num = RB.run_sxz(userid)
                         if run_num == 1:
@@ -136,7 +137,7 @@ class ReadyLogin(object):
 
 
 class RunSxz(object):
-    def __init__(self, username=None, password=None, wfname=None, userid=None, start_run_time=None):
+    def __init__(self, username=None, password=None, wfname=None, userid=None,wfname_id=None, start_run_time=None):
         """
         基于谷歌内核
         """
@@ -144,6 +145,7 @@ class RunSxz(object):
         self.password = password
         self.wfname = wfname
         self.userid = userid
+        self.wfname_id = wfname_id
         self.start_run_time = start_run_time
         # self.sxz_token = F'c8eb8d7b8fe2a3c07843233bf225082126db09ab59506bd5631abef4304da29e'
         self.jf_token = F'c8eb8d7b8fe2a3c07843233bf225082126db09ab59506bd5631abef4304da29e'
@@ -166,7 +168,7 @@ class RunSxz(object):
             "markdown": {
                 "title": "OMS推送",
                 "text":
-                    F'第{self.userid}个场站:{self.wfname}--已上报--电量--现场程序'
+                    F'第{self.wfname_id}个场站:{self.wfname}--已上报--电量--现场程序'
             }
         }
         self.message_cn = {
@@ -174,7 +176,7 @@ class RunSxz(object):
             "markdown": {
                 "title": "OMS推送",
                 "text":
-                    F'第:{self.userid}个场站:{self.wfname}--已上报--储能--现场程序'
+                    F'第:{self.wfname_id}个场站:{self.wfname}--已上报--储能--现场程序'
             }
         }
 
@@ -356,6 +358,7 @@ class RunSxz(object):
 
     def report_load_dl(self, table0, henan_oms_data):
         table0.ele(F'{henan_ele_dict.get("report_load")}').click()
+        print(F'点击了收报负荷！')
         table0.ele(F'{henan_ele_dict.get("report_load_button_dl")}').click()
         self.page.wait
 
@@ -441,7 +444,7 @@ class RunSxz(object):
 
     def upload_button_dl(self, table0):
         self.upload_button(table0)
-        self.send_ding_dl()
+        self.send_ding_dl(table0)
 
     def upload_button_cn(self, table0):
         self.upload_button(table0)
