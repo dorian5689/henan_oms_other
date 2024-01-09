@@ -115,7 +115,7 @@ class ReadyLogin(object):
                     current_time = datetime.now()
                     # 格式化当前时间
                     start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                    RB = RunSxz(username, password, wfname, userid, wfname_id,start_run_time)
+                    RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
                     try:
                         run_num = RB.run_sxz(userid)
                         if run_num == 1:
@@ -137,7 +137,7 @@ class ReadyLogin(object):
 
 
 class RunSxz(object):
-    def __init__(self, username=None, password=None, wfname=None, userid=None,wfname_id=None, start_run_time=None):
+    def __init__(self, username=None, password=None, wfname=None, userid=None, wfname_id=None, start_run_time=None):
         """
         基于谷歌内核
         """
@@ -148,20 +148,24 @@ class RunSxz(object):
         self.wfname_id = wfname_id
         self.start_run_time = start_run_time
         # self.sxz_token = F'c8eb8d7b8fe2a3c07843233bf225082126db09ab59506bd5631abef4304da29e'
+        # 天润
         self.jf_token = F'c8eb8d7b8fe2a3c07843233bf225082126db09ab59506bd5631abef4304da29e'
-        # self.sxz_token = F'bc76fa98dff3952b686985f93f2e96a92dd161b5daca7bfd4e4eaa7553f4fe4d'
+        # 奈卢斯
+        self.nls_token = F'acabcf918755694f2365051202cf3921a690594c1278e4b7fe960186dce58977'
 
         self.page = self.check_chrome()
         self.login = F"https://172.21.5.193:19070/app-portal/index.html"
         self.today = datetime.datetime.now().strftime("%Y-%m-%d")
         # 获取前一天的日期
         self.today_1 = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        # 天润
         self.appkey = "dingtc3bwfk9fnqr4g7s"  # image测试
         self.appsecret = "C33oOe03_K5pitN_S2dUppBwgit2VnPW0yWnWYBM3GzogGKhdy2yFUGREl9fLICU"  # image测试
         self.chatid = "chatf3b32d9471c57b4a5a0979efdb06d087"  # image测试
-        # self.appkey = "dingf4i7j3gysejztafz"  # image测试
-        # self.appsecret = "dKXLDK8yNzaKcXFi_fBHDNvN2B0eTt9dtm0YHOS1H7mYUHxcRASXgwb5oixmKs5y"  # image测试
-        # self.chatid = "chat984cfb46cbfa855ac55fd932467cacbd"  # image测试
+        # 奈卢斯
+        self.nls_appkey = "434e89afe668307088f0c4d6e28bd03c"  # image测试
+        self.nls_appsecret = "ICYb4-cvsvIk5DwuZY9zehc5UbpldqIClzS6uuIYFrhjU9z11guV6lold1qNqc2k"  # image测试
+        self.nls_chatid = "chatf8ef1e955cf2c4e83a7e776e0011366c"  # image测试
 
         self.message_dl = {
             "msgtype": "markdown",
@@ -373,18 +377,32 @@ class RunSxz(object):
     def send_ding_dl(self, table0):
         save_wind_wfname = self.save_pic(table0)
         from DingInfo.DingBotMix import DingApiTools
+        # 天润
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
         DAT.push_message(self.jf_token, self.message_dl)
         DAT.send_file(F'{save_wind_wfname}', 0)
         self.update_mysql()
 
+        # 奈卢斯
+        DAT = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                           chatid_value=self.nls_chatid)
+        DAT.push_message(self.nls_token, self.message_dl)
+        DAT.send_file(F'{save_wind_wfname}', 0)
+
     def send_ding_cn(self, table0):
         save_wind_wfname = self.save_pic(table0)
         from DingInfo.DingBotMix import DingApiTools
+        # 天润
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
         DAT.push_message(self.jf_token, self.message_cn)
         DAT.send_file(F'{save_wind_wfname}', 0)
         self.update_mysql()
+
+        # 奈卢斯
+        DAT = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                           chatid_value=self.nls_chatid)
+        DAT.push_message(self.nls_token, self.message_dl)
+        DAT.send_file(F'{save_wind_wfname}', 0)
 
     def save_pic(self, table0):
         import os
